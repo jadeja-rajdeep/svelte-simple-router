@@ -1,0 +1,15 @@
+<script>
+	import { activeRoute } from './../store.js';
+	import { svelteRouteMatcher } from './../router.js';
+	import Route from './route.svelte';
+	export let routes;
+	export let currentRoute = {};
+	currentRoute = svelteRouteMatcher(routes);
+</script>
+{#await currentRoute}
+	<p>...waiting</p>
+{:then currentRoute}
+	<Route currentRoute={$activeRoute} />
+{:catch error}
+	<p style="color: red">{error.message}</p>
+{/await}
