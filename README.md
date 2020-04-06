@@ -7,7 +7,7 @@
 with npm
 
 ```bash
-npm i svelte-router-spa
+npm i svelte-simple-router
 ```
 
 ## Usage Note
