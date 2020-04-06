@@ -1,5 +1,5 @@
 {
-  "name": "sveltesparouter",
+  "name": "svelte-simple-router",
   "version": "1.0.0",
   "description": "Svelte 3 History Based Single Page Router",
   "main": "src/index.js",
@@ -10,12 +10,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jadeja-rajdeep/svelteSpaRouter.git"
+    "url": "git+https://github.com/jadeja-rajdeep/svelte-simple-router.git"
   },
   "author": "Rajdeepsinh Jadeja <jadeja.rajdeep@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jadeja-rajdeep/svelteSpaRouter/issues"
+    "url": "https://github.com/jadeja-rajdeep/svelte-simple-router/issues"
   },
-  "homepage": "https://github.com/jadeja-rajdeep/svelteSpaRouter#readme"
+  "homepage": "https://github.com/jadeja-rajdeep/svelte-simple-router#readme"
 }
