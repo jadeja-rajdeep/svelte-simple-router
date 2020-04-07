@@ -1,6 +1,6 @@
 {
   "name": "svelte-simple-router",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Svelte 3 History Based Single Page Router",
   "main": "src/index.js",
   "svelte": "src/index.js",
@@ -17,5 +17,11 @@
   "bugs": {
     "url": "https://github.com/jadeja-rajdeep/svelte-simple-router/issues"
   },
-  "homepage": "https://github.com/jadeja-rajdeep/svelte-simple-router#readme"
+  "homepage": "https://github.com/jadeja-rajdeep/svelte-simple-router#readme",
+  "keywords": [
+    "svelte",
+    "router",
+    "spa",
+    "single page application"
+  ]
 }

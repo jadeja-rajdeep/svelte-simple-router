@@ -216,6 +216,20 @@ groupGuard: [
 
 Using group guard you can guard the multiple routes using matching starting path or any regular expression that you want to check.
 
+Fields | Description
+-------|------------
+**routes:** | array of object hold all your routes for your application
+**routes:name:** | you need to provide unique name for each of your routes.
+**routes:url:** | array of regular expression that you want to match for that particular route
+**routes:searchFilter:** | a callback function for extra custom matching function if you required other than regular expression
+**routes:guard:** | if you want to guard that particular route for some conditional check.
+**routes:guard:with:** | a callback function for checking and guarding particular route. must return either **true** or **false**
+**routes:guard:redirectOnFail:** | a function or string url for redirect if guard is fail. if it is a function then must return valid **url**
+**routes:layout:** | layout component that you want to load, if you dont provide then only component is loaded.
+**routes:component:** | page component that you want to load under the layout or without layout.
+
+
+
 in the **url** you can pass any multiple array of regular expression that you want to match.
 
 every time new page is requested and any group guard is matched it run the check using the **with** function that you provided
@@ -278,6 +292,125 @@ Fields | Description
 ```
 
 **404** named route is required to display the component if no component or layout is found.
+
+## currentRoute object
+
+every layout and component passed **currentRoute** props to easily available some router related information.
+
+for example if you visit this url
+
+http://localhost:5000/members/name/rajdeep?quervar1=value1
+
+```javascript
+{
+  "routePosition": 1,
+  "routeName": "members",
+  "pathName": "/members/name/rajdeep",
+  "pageName": "members",
+  "singleParams": [
+    "members",
+    "name",
+    "rajdeep"
+  ],
+  "namedParams": {
+    "name": "rajdeep"
+  },
+  "queryParams": {
+    "quervar1": "value1"
+  },
+  "layout": {
+    "viewed": false
+  },
+  "component": {
+    "viewed": false
+  }
+}
+````
+
+## searchFilter, group:with, group:redirectOnFail, groupGuard:with, groupGuard:redirectOnFail
+
+all above function in your routes object passed two parameter
+
+### **1) routerData**
+
+**routerData** contains
+
+for example 
+
+```javascript
+"pathName": "/members/name/rajdeep",
+"pageName": "members",
+"singleParams": [
+"members",
+"name",
+"rajdeep"
+],
+"namedParams": {
+"name": "rajdeep"
+},
+"queryParams": {
+"quervar1": "value1"
+}
+```
+
+
+### **2) route**
+
+**route** contains whole object of your route that you defined in **routes** object
+
+for example
+
+```javascript
+{
+	name: "dashboard",
+	url: [/^dashboard$/, /^\s*$/],
+	searchFilter: async function (routerData, route) {
+		return true;
+	},
+	guard: {
+		with: async function (routerData, route) {
+			return true;
+		},
+		redirectOnFail: '/404'
+	},
+	layout: AdminLayout,
+	component: Dashboard
+}
+```
+
+## <a href=""> in router
+
+By default router will capture all the <a href=""> onclick event and based on the href it will match the route
+
+if it's not same domain link then it will just do the regular redirect 
+
+if it's same domain link then it will start the matching process and load the matched route
+
+### <a href="" class="no-follow">
+
+if you dont want capture some of your <a> link in router by default.
+
+then just add the **class="no-follow"** and those click event will not goes into matching.
+
+## Manually / Code level redirect
+
+```javascript
+import {RouterRedirect} from 'svelte-simple-router';
+```
+
+will provide you redirect functionality at code level.
+
+usage example
+
+```javascript
+RouterRedirect('/some-other-url');
+RouterRedirect('https://someother.url');
+```
+
+
+
+
+
 
 
 
