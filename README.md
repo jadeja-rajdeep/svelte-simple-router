@@ -257,23 +257,14 @@ routes: [
 Fields | Description
 -------|------------
 **routes:** | array of object hold all your routes for your application
-
 **routes:name:** | you need to provide unique name for each of your routes.
-
 **routes:url:** | array of regular expression that you want to match for that particular route
-
 **routes:searchFilter:** | a callback function for extra custom matching function if you required other than regular expression
-
 **routes:guard:** | if you want to guard that particular route for some conditional check.
-
 **routes:guard:with:** | a callback function for checking and guarding particular route. must return either **true** or **false**
-
 **routes:guard:redirectOnFail:** | a function or string url for redirect if guard is fail. if it is a function then must return valid **url**
-
 **routes:layout:** | layout component that you want to load, if you dont provide then only component is loaded.
-
 **routes:component:** | page component that you want to load under the layout or without layout.
-
 
 #### Mandatory routes
 
