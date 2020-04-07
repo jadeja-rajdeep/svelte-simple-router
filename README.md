@@ -363,17 +363,17 @@ for example
 }
 ```
 
-## ```html <a href="">``` in router
+## ```<a href="">``` in router
 
-By default router will capture all the ```html <a href="">``` onclick event and based on the href it will match the route
+By default router will capture all the ```<a href="">``` onclick event and based on the href it will match the route
 
 if it's not same domain link then it will just do the regular redirect 
 
 if it's same domain link then it will start the matching process and load the matched route
 
-### ```html <a href="" class="no-follow">```
+### ```<a href="" class="no-follow">```
 
-if you dont want capture some of your ```html <a>``` link in router by default.
+if you dont want capture some of your ```<a>``` link in router by default.
 
 then just add the **class="no-follow"** and those click event will not goes into matching.
 
