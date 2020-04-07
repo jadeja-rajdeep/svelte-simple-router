@@ -218,25 +218,10 @@ Using group guard you can guard the multiple routes using matching starting path
 
 Fields | Description
 -------|------------
-**routes:** | array of object hold all your routes for your application
-**routes:name:** | you need to provide unique name for each of your routes.
-**routes:url:** | array of regular expression that you want to match for that particular route
-**routes:searchFilter:** | a callback function for extra custom matching function if you required other than regular expression
-**routes:guard:** | if you want to guard that particular route for some conditional check.
-**routes:guard:with:** | a callback function for checking and guarding particular route. must return either **true** or **false**
-**routes:guard:redirectOnFail:** | a function or string url for redirect if guard is fail. if it is a function then must return valid **url**
-**routes:layout:** | layout component that you want to load, if you dont provide then only component is loaded.
-**routes:component:** | page component that you want to load under the layout or without layout.
-
-
-
-in the **url** you can pass any multiple array of regular expression that you want to match.
-
-every time new page is requested and any group guard is matched it run the check using the **with** function that you provided
-
-if **with** callback function return false then it will check the **redirectOnFail** which is either a funtion or you can pass direct url string
-
-if its function then you must return valid **url** for redirect.
+**groupGuard:** | array of object hold all your group routes for your application
+**groupGuard:url:** | array of regular expression that you want to match for that particular group route
+**groupGuard:with:** | a callback function for checking and guarding particular route. must return either **true** or **false**
+**groupGuard:redirectOnFail:** | a function or string url for redirect if guard is fail. if it is a function then must return valid **url**
 
 groupGuard always check and run after specific url guard is completed.
 
@@ -378,17 +363,17 @@ for example
 }
 ```
 
-## <a href=""> in router
+## ```html <a href="">``` in router
 
-By default router will capture all the <a href=""> onclick event and based on the href it will match the route
+By default router will capture all the ```html <a href="">``` onclick event and based on the href it will match the route
 
 if it's not same domain link then it will just do the regular redirect 
 
 if it's same domain link then it will start the matching process and load the matched route
 
-### <a href="" class="no-follow">
+### ```html <a href="" class="no-follow">```
 
-if you dont want capture some of your <a> link in router by default.
+if you dont want capture some of your ```html <a>``` link in router by default.
 
 then just add the **class="no-follow"** and those click event will not goes into matching.
 
@@ -406,10 +391,6 @@ usage example
 RouterRedirect('/some-other-url');
 RouterRedirect('https://someother.url');
 ```
-
-
-
-
 
 
 
