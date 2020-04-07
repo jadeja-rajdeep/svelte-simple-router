@@ -128,3 +128,173 @@ we created dashboard.svelte file
 </script>
 <h1>Dashboard</h1>
 ```
+
+## Structure of routes object
+
+```javascript
+import AdminLayout from './views/layouts/admin.svelte';
+import PublicLayout from './views/layouts/public.svelte';
+import Dashboard from './views/pages/dashboard.svelte';
+import MembersList from './views/pages/membersList.svelte';
+import Page404 from './views/pages/404.svelte';
+
+const routes = {
+	groupGuard: [
+		{
+			url: [/^members/],
+			with: async function (routerData, route) {
+				return true;
+			},
+			redirectOnFail: function (routerData, route) {
+				return '/dashboard';
+			}
+		},
+		{
+			url: [/^dashboard/],
+			with: async function (routerData, route) {
+				return true;
+			},
+			redirectOnFail:"/login"
+		}
+
+	],
+	routes: [
+		{
+			name: "dashboard",
+			url: [/^dashboard$/, /^\s*$/],
+			guard: {
+				with: async function (routerData, route) {
+					return true;
+				},
+				redirectOnFail: '/404'
+			},
+			layout: AdminLayout,
+			component: Dashboard
+		},
+		{
+			name: "members",
+			url: [/^members/],
+			searchFilter: async function (routerData, route) {
+				return true;
+			},
+			guard: {
+				with: async function (routerData, route) {
+					return true;
+				},
+				redirectOnFail: '/404'
+			},
+			layout: AdminLayout,
+			component: MembersList
+		},
+		{
+			name: "404",
+			url: [/^404$/],
+			layout: PublicLayout,
+			component: Page404
+		}
+	]
+};
+
+export { routes }
+```
+### 1) groupGuard
+
+```javascript
+groupGuard: [
+	{
+		url: [/^members/],
+		with: async function (routerData, route) {
+			return true;
+		},
+		redirectOnFail: function (routerData, route) {
+			return '/dashboard';
+		}
+	}
+
+]
+```
+
+Using group guard you can guard the multiple routes using matching starting path or any regular expression that you want to check.
+
+in the **url** you can pass any multiple array of regular expression that you want to match.
+
+every time new page is requested and any group guard is matched it run the check using the **with** function that you provided
+
+if **with** callback function return false then it will check the **redirectOnFail** which is either a funtion or you can pass direct url string
+
+if its function then you must return valid **url** for redirect.
+
+groupGuard always check and run after specific url guard is completed.
+
+### 2) routes
+
+```javascript
+routes: [
+	{
+		name: "dashboard",
+		url: [/^dashboard$/, /^\s*$/],
+		searchFilter: async function (routerData, route) {
+			return true;
+		},
+		guard: {
+			with: async function (routerData, route) {
+				return true;
+			},
+			redirectOnFail: '/404'
+		},
+		layout: AdminLayout,
+		component: Dashboard
+	},
+	{
+		name: "404",
+		url: [/^404$/],
+		layout: PublicLayout,
+		component: Page404
+	}
+]
+```
+
+Fields | Description
+-------|------------
+**routes:** | array of object hold all your routes for your application
+
+**routes:name:** | you need to provide unique name for each of your routes.
+
+**routes:url:** | array of regular expression that you want to match for that particular route
+
+**routes:searchFilter:** | a callback function for extra custom matching function if you required other than regular expression
+
+**routes:guard:** | if you want to guard that particular route for some conditional check.
+
+**routes:guard:with:** | a callback function for checking and guarding particular route. must return either **true** or **false**
+
+**routes:guard:redirectOnFail:** | a function or string url for redirect if guard is fail. if it is a function then must return valid **url**
+
+**routes:layout:** | layout component that you want to load, if you dont provide then only component is loaded.
+
+**routes:component:** | page component that you want to load under the layout or without layout.
+
+
+#### Mandatory routes
+
+```javascript
+{
+	name: "404",
+	url: [/^404$/],
+	layout: PublicLayout,
+	component: Page404
+}
+```
+
+**404** named route is required to display the component if no component or layout is found.
+
+
+
+
+
+
+
+
+
+
+
