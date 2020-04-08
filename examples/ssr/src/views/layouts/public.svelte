@@ -1,5 +1,5 @@
 <script>
-	import { Route } from './../../router';
+	import { Route } from 'svelte-simple-router';
 	export let currentRoute = {}
 </script>
 <div>
