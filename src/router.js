@@ -90,11 +90,20 @@ async function svelteRouteMatcher(router, url = "") {
 			let patt_res2 = patt.test(routerData.pageName);
 			if (patt_res1 === true || patt_res2 === true) {
 				if (typeof router.routes[x].searchFilter === "function") {
-					if (router.routes[x].searchFilter(routerData, router.routes[x])) {
+					let checkSearchFilter = false;
+
+					if (router.routes[x].searchFilter.constructor.name === "AsyncFunction") {
+						if (await router.routes[x].searchFilter(routerData, router.routes[x])) checkSearchFilter = true;
+					} else {
+						if (router.routes[x].searchFilter(routerData, router.routes[x])) checkSearchFilter = true;
+					}
+
+					if (checkSearchFilter === true) {
 						//get route and pass into loader
 						routePosition = x;
 						break;
 					}
+
 				} else {
 					//get route and pass into loader
 					routePosition = x;
@@ -107,7 +116,14 @@ async function svelteRouteMatcher(router, url = "") {
 
 	if (routePosition >= 0) {
 		if (router.routes[routePosition].hasOwnProperty('guard') && router.routes[routePosition].guard.hasOwnProperty('with') && typeof router.routes[routePosition].guard.with === "function") {
-			if (!await router.routes[routePosition].guard.with(routerData, router.routes[routePosition])) {
+			let checkGuardWith = false;
+			if (router.routes[routePosition].guard.with === "AsyncFunction") {
+				if (await router.routes[routePosition].guard.with(routerData, router.routes[routePosition])) checkGuardWith = true;
+			} else {
+				if (router.routes[routePosition].guard.with(routerData, router.routes[routePosition])) checkGuardWith = true;
+			}
+
+			if (checkGuardWith === false) {
 				routePositionOnFail = routePosition;
 				if (router.routes[routePosition].guard.hasOwnProperty('redirectOnFail')) {
 					redirectOnFail = router.routes[routePosition].guard.redirectOnFail;
@@ -124,7 +140,15 @@ async function svelteRouteMatcher(router, url = "") {
 					let patt_res2 = patt.test(routerData.pageName);
 					if (patt_res1 === true || patt_res2 === true) {
 						if (typeof router.groupGuard[x].with === "function") {
-							if (!await router.groupGuard[x].with(routerData, router.routes[x])) {
+							let checkGroupGuardWith = false;
+
+							if (router.groupGuard[x].with === "AsyncFunction") {
+								if (await router.groupGuard[x].with(routerData, router.routes[x])) checkGroupGuardWith = true;
+							} else {
+								if (router.groupGuard[x].with(routerData, router.routes[x])) checkGroupGuardWith = true;
+							}
+
+							if (checkGroupGuardWith === false) {
 								routePositionOnFail = routePosition;
 								if (router.groupGuard[x].hasOwnProperty('redirectOnFail')) {
 									redirectOnFail = router.groupGuard[x].redirectOnFail;
@@ -150,7 +174,12 @@ async function svelteRouteMatcher(router, url = "") {
 		}
 
 	} else if (typeof redirectOnFail === "function") {
-		let tempurl = await redirectOnFail(routerData, router.routes[routePositionOnFail]);
+		let tempurl;
+		if (router.groupGuard[x].with === "AsyncFunction") {
+			tempurl = await redirectOnFail(routerData, router.routes[routePositionOnFail]);
+		} else {
+			tempurl = redirectOnFail(routerData, router.routes[routePositionOnFail]);
+		}
 		if (typeof tempurl === "string" && tempurl !== "" && typeof tempurl !== "undefined") {
 			if (sveletRouterCheckHost(tempurl)) {
 				history.pushState("", "", tempurl);

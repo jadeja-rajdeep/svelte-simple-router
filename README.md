@@ -314,6 +314,8 @@ http://localhost:5000/members/name/rajdeep?quervar1=value1
 
 ## searchFilter, group:with, group:redirectOnFail, groupGuard:with, groupGuard:redirectOnFail
 
+you can define all above callback function in **Synchronous** or **Asynchronous** manner as per your application need.
+
 all above function in your routes object passed two parameter
 
 ### **1) routerData**

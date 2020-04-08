@@ -8,7 +8,7 @@
 	currentRoute = svelteRouteMatcher(routes, url);
 </script>
 {#await currentRoute}
-	<p>...waiting</p>
+	<p>Loading...</p>
 {:then currentRoute}
 	<Route currentRoute={$activeRoute} />
 {:catch error}
