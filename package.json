@@ -1,13 +1,9 @@
 {
   "name": "svelte-simple-router",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "Svelte 3 History Based Single Page Router",
   "main": "src/index.js",
   "svelte": "src/index.js",
-  "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jadeja-rajdeep/svelte-simple-router.git"
@@ -22,6 +18,8 @@
     "svelte",
     "router",
     "spa",
-    "single page application"
+    "single page application",
+    "ssr",
+    "server side rendering"
   ]
 }

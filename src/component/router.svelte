@@ -3,8 +3,9 @@
 	import { svelteRouteMatcher } from './../router.js';
 	import Route from './route.svelte';
 	export let routes;
+	export let url = "";
 	export let currentRoute = {};
-	currentRoute = svelteRouteMatcher(routes);
+	currentRoute = svelteRouteMatcher(routes, url);
 </script>
 {#await currentRoute}
 	<p>...waiting</p>

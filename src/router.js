@@ -31,13 +31,52 @@ function svelteRouteBuilder() {
 	return { pathName, pageName, singleParams, namedParams, queryParams };
 }
 
-async function svelteRouteMatcher(router) {
+function svelteRouteBuilderFromUrl(url) {
+	let newUrl = new URL(url);
+
+	let pathName = newUrl.pathname;
+	let singleParams = [];
+	singleParams = pathName.split("/");
+	singleParams = singleParams.filter(Boolean);
+
+	let pageName = "";
+	if (singleParams[0]) pageName = singleParams[0];
+
+	let namedParams = {};
+	for (let x = 1; x < singleParams.length; x++) {
+		namedParams[singleParams[x]] = singleParams[x + 1];
+		x++;
+	}
+
+	//this code for creating parameter list using querystring/search parameters.
+	let queryParams = {};
+	let query = newUrl.search;
+	let queryParamsTemp = query.replace("?", "");
+	queryParamsTemp = queryParamsTemp.split("&");
+	queryParamsTemp = queryParamsTemp.filter(Boolean);
+	for (let x = 0; x < queryParamsTemp.length; x++) {
+		let temp = queryParamsTemp[x].split("=");
+		queryParams[temp[0]] = temp[1];
+	}
+
+	return { pathName, pageName, singleParams, namedParams, queryParams };
+}
+
+async function svelteRouteMatcher(router, url = "") {
 	if (!globalRouter && router) {
 		globalRouter = router;
 	}
 	if (!router) router = globalRouter;
 
-	let routerData = svelteRouteBuilder();
+	let routerData = {};
+
+	if (url == "") {
+		routerData = svelteRouteBuilder();
+	} else {
+		routerData = svelteRouteBuilderFromUrl(url);
+	}
+
+
 	let routePosition = -1;
 	let requestedRoute;
 	let redirectOnFail = '';
@@ -50,18 +89,16 @@ async function svelteRouteMatcher(router) {
 			let patt_res1 = patt.test(routerData.pathName);
 			let patt_res2 = patt.test(routerData.pageName);
 			if (patt_res1 === true || patt_res2 === true) {
-				if (sveletRouterParameterMatcher(router.routes[x], routerData) === true && sveletRouterParameterConditionMatcher(router.routes[x], routerData) === true) {
-					if (typeof router.routes[x].searchFilter === "function") {
-						if (router.routes[x].searchFilter(routerData, router.routes[x])) {
-							//get route and pass into loader
-							routePosition = x;
-							break;
-						}
-					} else {
+				if (typeof router.routes[x].searchFilter === "function") {
+					if (router.routes[x].searchFilter(routerData, router.routes[x])) {
 						//get route and pass into loader
 						routePosition = x;
 						break;
 					}
+				} else {
+					//get route and pass into loader
+					routePosition = x;
+					break;
 				}
 			}
 		}
@@ -150,142 +187,6 @@ async function svelteRouteMatcher(router) {
 	return activeRouteTemp;
 }
 
-//match the parameter based on search
-function sveletRouterParameterMatcher(route, routerData) {
-	if (route && route.search && route.search.length > 0) {
-		let trueCounter = 0;
-		for (let z = 0; z < route.search.length; z++) {
-			let keyCounter = 0;
-			let keyCounterState = 0;
-			for (const key in route.search[z]) {
-				if (route.search[z].hasOwnProperty(key)) {
-					//let patt = new RegExp(route.search[z][key]);
-					let patt = route.search[z][key];
-					let patt_res1 = patt.test(routerData.queryParams[key]);
-					let patt_res2 = patt.test(routerData.namedParams[key]);
-					if (patt_res1 === true || patt_res2 === true) {
-						keyCounterState++;
-					}
-					keyCounter++;
-				}
-			}
-			if (keyCounterState >= keyCounter) {
-				trueCounter++;
-			}
-		}
-		if (trueCounter > 0) {
-			return true;
-		} else {
-			return false;
-		}
-	} else {
-		return true;
-	}
-}
-
-//match the parameter based on condtion
-function sveletRouterParameterConditionMatcher(route, routerData) {
-	if (route && (route.groupSearchOperator == "||" || route.groupSearchOperator == "&&") && route.searchCondition && route.searchCondition.length > 0) {
-		let masterCondtion = false;
-		let groupCondtion = false;
-		masterloop: for (let x = 0; x < route.searchCondition.length; x++) {
-			let groupOperator = route.searchCondition[x].operator;
-			if (groupOperator !== "||" && groupOperator !== "&&") {
-				groupOperator == "||";
-			}
-
-			grouploop: for (let y = 0; y < route.searchCondition[x].group.length; y++) {
-				let cond = route.searchCondition[x].group[y];
-				let condStatus = false;
-				if (cond[0] !== "search" && cond[0] !== "para" && cond[0] !== "var") cond[0] = "search";
-				if (cond[0] != "" && cond[1] != "" && cond[2] != "" && cond[3] != "") {
-					let search;
-					let value;
-					let vregx = /^\{{(.+)\}}$/;
-					if (cond[0] == "var") {
-						if (vregx.test(cond[1])) {
-							search = eval(cond[1].replace(vregx, "$1"));
-						} else {
-							search = cond[1];
-						}
-					} else if (cond[0] == "para") {
-						search = routerData.singleParams[cond[1]];
-					} else if (cond[0] == "namedpara") {
-						search = routerData.namedParams[cond[1]];
-					} else {
-						search = routerData.queryParams[cond[1]];
-					}
-
-					if (vregx.test(cond[3])) {
-						value = eval(cond[3].replace(vregx, "$1"));
-					} else {
-						value = cond[3];
-					}
-					if (cond[2] === "==") {
-						if (search == value) {
-							condStatus = true;
-						}
-					} else if (cond[2] === "===") {
-						if (search === value) {
-							condStatus = true;
-						}
-					} else if (cond[2] === ">") {
-						if (search > value) {
-							condStatus = true;
-						}
-					} else if (cond[2] === "<") {
-						if (search < value) {
-							condStatus = true;
-						}
-					} else if (cond[2] === ">=") {
-						if (search >= value) {
-							condStatus = true;
-						}
-					} else if (cond[2] === "<=") {
-						if (search <= value) {
-							condStatus = true;
-						}
-					} else if (cond[2] === "!=") {
-						if (search != value) {
-							condStatus = true;
-						}
-					} else if (cond[2] === "!==") {
-						if (search !== value) {
-							condStatus = true;
-						}
-					}
-				}
-
-				if (groupOperator == "&&" && condStatus == false) {
-					groupCondtion = false;
-					break grouploop;
-				} else if (groupOperator == "||" && condStatus == true) {
-					groupCondtion = true;
-					break grouploop;
-				} else if (groupOperator == "||" && condStatus == false) {
-					groupCondtion = false;
-				} else {
-					groupCondtion = true;
-				}
-			}
-
-			if (route.groupSearchOperator == "&&" && groupCondtion == false) {
-				masterCondtion = false;
-				break;
-			} else if (route.groupSearchOperator == "||" && groupCondtion == true) {
-				masterCondtion = true;
-				break;
-			} else if (route.groupSearchOperator == "||" && groupCondtion == false) {
-				masterCondtion = false;
-			} else {
-				masterCondtion = true;
-			}
-		}
-		return masterCondtion;
-	}
-	return true;
-}
-
 //find the route based on ID field.
 function sveletRouterNameMatcher(name, router) {
 	name = name.toString();
@@ -343,49 +244,3 @@ if (typeof window !== 'undefined') {
 }
 
 export { svelteRouteMatcher, svelteRouterRedirect }
-
-/*
-const router = {
-	groupGuard: [
-		{
-			url: [/^members/],
-			with: function (routerData, route) {
-				return false;
-			},
-			redirectOnFail: function (routerData, route) {
-				return 'https://google.com';
-			}
-		}
-
-	],
-	routes: [
-		{
-			name: "dashboard",
-			url: [/^dashboard$/, /^\s*$/],
-			guard: {
-				with: function (routerData, route) {
-					return true;
-				},
-				redirectOnFail: '/404'
-			},
-layout: AdminLayout,
-	component: Dashboard
-		},
-{
-	name: "members",
-		url: [/^members/],
-			searchFilter: function (routerData, route) {
-				return true;
-			},
-	layout: AdminLayout,
-		component: MembersList
-},
-{
-	name: "404",
-		url: [/^404$/],
-			layout: PublicLayout,
-				component: Page404
-}
-	]
-};
-*/

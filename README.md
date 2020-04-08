@@ -1,6 +1,6 @@
 # svelte-simple-router
 
-## Svelte 3 History Based Single Page Router
+## Svelte 3 History Based Single Page Router With Server Side Rendering (SSR) support
 
 ## Installtion
 
@@ -390,6 +390,172 @@ usage example
 ```javascript
 RouterRedirect('/some-other-url');
 RouterRedirect('https://someother.url');
+```
+
+## Settings For Server Side Rendering (SSR)
+
+there is example in examples/ssr folder on github.
+
+### rollup.config.js
+
+```javascript
+import svelte from 'rollup-plugin-svelte';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import livereload from 'rollup-plugin-livereload';
+import { terser } from 'rollup-plugin-terser';
+
+const production = !process.env.ROLLUP_WATCH;
+
+export default [
+	//browser bundel
+	{
+
+		input: 'src/main.js',
+		output: {
+			sourcemap: true,
+			format: 'iife',
+			name: 'app',
+			file: 'public/build/bundle.js'
+		},
+		plugins: [
+			svelte({
+				// enable run-time checks when not in production
+				dev: !production,
+				// we'll extract any component CSS out into
+				// a separate file - better for performance
+				css: css => {
+					css.write('public/build/bundle.css');
+				},
+				hydratable: true
+			}),
+
+			// If you have external dependencies installed from
+			// npm, you'll most likely need these plugins. In
+			// some cases you'll need additional configuration -
+			// consult the documentation for details:
+			// https://github.com/rollup/plugins/tree/master/packages/commonjs
+			resolve({
+				browser: true,
+				dedupe: ['svelte']
+			}),
+			commonjs(),
+
+			// In dev mode, call `npm run start` once
+			// the bundle has been generated
+			!production && serve(),
+
+			// Watch the `public` directory and refresh the
+			// browser on changes when not in production
+			!production && livereload('public'),
+
+			// If we're building for production (npm run build
+			// instead of npm run dev), minify
+			production && terser()
+		],
+		watch: {
+			clearScreen: false
+		}
+	},
+	//server ssr bundel
+	{
+		input: "src/App.svelte",
+		output: {
+			sourcemap: false,
+			format: "cjs",
+			name: "app",
+			file: "public/App.js"
+		},
+		plugins: [
+			svelte({
+				generate: "ssr"
+			}),
+			resolve(),
+			commonjs(),
+			production && terser()
+		]
+	}
+
+];
+
+function serve() {
+	let started = false;
+
+	return {
+		writeBundle() {
+			if (!started) {
+				started = true;
+
+				require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {
+					stdio: ['ignore', 'inherit', 'inherit'],
+					shell: true
+				});
+			}
+		}
+	};
+}
+```
+
+### App.svelte
+```javascript
+<script>
+	import { Router } from 'svelte-simple-router';
+	import { routes } from './routes.js';
+
+	// Used for SSR. A falsy value is ignored by the Router.
+	export let url = "";
+</script>
+
+<Router routes={routes} url="{url}" />
+```
+
+### main.js (entry point of your browser bundel app)
+```javascript
+import App from './App.svelte';
+
+const app = new App({
+	target: document.body,
+	hydrate: true
+});
+
+export default app;
+```
+
+### node.js server
+
+you can use any server of your choice 
+
+```javascript
+const http = require('http');
+const App = require('./public/App.js');
+const port = 3000
+
+const requestHandler = (request, response) => {
+	let url = 'http://' + request.headers.host + request.url;
+	const { head, html, css } = App.render({ url: url });
+	let output = `<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Document</title>
+		<link rel='stylesheet' href='http://localhost:5000/global.css'>
+		<link rel='stylesheet' href='http://localhost:5000/build/bundle.css'>
+		<script defer src='http://localhost:5000/build/bundle.js'></script>
+	</head>
+	<body>${html}</body>
+	</html>`;
+	response.end(output);
+}
+
+const server = http.createServer(requestHandler)
+
+server.listen(port, (err) => {
+	if (err) {
+		return console.log('something bad happened', err)
+	}
+	console.log(`server is listening on ${port}`)
+})
 ```
 
 
