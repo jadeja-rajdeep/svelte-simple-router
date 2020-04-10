@@ -60,6 +60,7 @@ const routes = {
 		{
 			name: "members",
 			url: [/^members/],
+			urlPathMapKeys: ['', 'key1', 'key2'],
 			searchFilter: async function (routerData, route) {
 				return true;
 			},
@@ -174,6 +175,7 @@ const routes = {
 		{
 			name: "members",
 			url: [/^members/],
+			urlPathMapKeys: ['', 'key1', 'key2'],
 			searchFilter: async function (routerData, route) {
 				return true;
 			},
@@ -258,6 +260,7 @@ Fields | Description
 **routes:** | array of object hold all your routes for your application
 **routes:name:** | you need to provide unique name for each of your routes.
 **routes:url:** | array of regular expression that you want to match for that particular route
+**routes:urlPathMapKeys:** | array of keyname that assign to each path item.
 **routes:searchFilter:** | a callback function for extra custom matching function if you required other than regular expression
 **routes:guard:** | if you want to guard that particular route for some conditional check.
 **routes:guard:with:** | a callback function for checking and guarding particular route. must return either **true** or **false**

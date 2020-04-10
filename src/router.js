@@ -4,7 +4,7 @@ export let globalRouter;
 
 function svelteRouteBuilder() {
 	let pathName = window.location.pathname;
-	let singleParams = [];
+	let singleParams = new Array();
 	singleParams = pathName.split("/");
 	singleParams = singleParams.filter(Boolean);
 
@@ -35,7 +35,7 @@ function svelteRouteBuilderFromUrl(url) {
 	let newUrl = new URL(url);
 
 	let pathName = newUrl.pathname;
-	let singleParams = [];
+	let singleParams = new Array();
 	singleParams = pathName.split("/");
 	singleParams = singleParams.filter(Boolean);
 
@@ -60,6 +60,15 @@ function svelteRouteBuilderFromUrl(url) {
 	}
 
 	return { pathName, pageName, singleParams, namedParams, queryParams };
+}
+
+function svelteRouteKeyMap(routerData, route) {
+	for (let x = 0; x < route.urlPathMapKeys.length; x++) {
+		if (route.urlPathMapKeys[x] !== "" && routerData.singleParams[x] && routerData.singleParams[x] !== "undefined") {
+			routerData.namedParams[route.urlPathMapKeys[x]] = routerData.singleParams[x];
+		}
+	}
+	return routerData;
 }
 
 async function svelteRouteMatcher(router, url = "") {
@@ -89,6 +98,11 @@ async function svelteRouteMatcher(router, url = "") {
 			let patt_res1 = patt.test(routerData.pathName);
 			let patt_res2 = patt.test(routerData.pageName);
 			if (patt_res1 === true || patt_res2 === true) {
+
+				if (router.routes[x].urlPathMapKeys && router.routes[x].urlPathMapKeys.length > 0) {
+					routerData = svelteRouteKeyMap(routerData, router.routes[x]);
+				}
+
 				if (typeof router.routes[x].searchFilter === "function") {
 					let checkSearchFilter = false;
 
