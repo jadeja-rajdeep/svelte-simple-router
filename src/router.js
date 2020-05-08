@@ -131,7 +131,7 @@ async function svelteRouteMatcher(router, url = "") {
 	if (routePosition >= 0) {
 		if (router.routes[routePosition].hasOwnProperty('guard') && router.routes[routePosition].guard.hasOwnProperty('with') && typeof router.routes[routePosition].guard.with === "function") {
 			let checkGuardWith = false;
-			if (router.routes[routePosition].guard.with === "AsyncFunction") {
+			if (router.routes[routePosition].guard.with.constructor.name === "AsyncFunction") {
 				if (await router.routes[routePosition].guard.with(routerData, router.routes[routePosition])) checkGuardWith = true;
 			} else {
 				if (router.routes[routePosition].guard.with(routerData, router.routes[routePosition])) checkGuardWith = true;
@@ -156,7 +156,7 @@ async function svelteRouteMatcher(router, url = "") {
 						if (typeof router.groupGuard[x].with === "function") {
 							let checkGroupGuardWith = false;
 
-							if (router.groupGuard[x].with === "AsyncFunction") {
+							if (router.groupGuard[x].with.constructor.name === "AsyncFunction") {
 								if (await router.groupGuard[x].with(routerData, router.routes[x])) checkGroupGuardWith = true;
 							} else {
 								if (router.groupGuard[x].with(routerData, router.routes[x])) checkGroupGuardWith = true;
@@ -189,7 +189,7 @@ async function svelteRouteMatcher(router, url = "") {
 
 	} else if (typeof redirectOnFail === "function") {
 		let tempurl;
-		if (router.groupGuard[x].with === "AsyncFunction") {
+		if (router.groupGuard[x].with.constructor.name === "AsyncFunction") {
 			tempurl = await redirectOnFail(routerData, router.routes[routePositionOnFail]);
 		} else {
 			tempurl = redirectOnFail(routerData, router.routes[routePositionOnFail]);
