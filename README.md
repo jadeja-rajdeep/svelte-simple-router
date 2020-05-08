@@ -563,11 +563,280 @@ server.listen(port, (err) => {
 })
 ```
 
+## Settings For Code Splitting
+
+there is example in examples/code-splitting folder on github.
+
+### rollup.config.js
+
+```javascript
+import svelte from 'rollup-plugin-svelte';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import livereload from 'rollup-plugin-livereload';
+import { terser } from 'rollup-plugin-terser';
+
+const production = !process.env.ROLLUP_WATCH;
+
+export default [
+	//browser bundel for code splitting
+	{
+
+		input: 'src/main.js',
+		output: {
+			sourcemap: true,
+			format: 'es',
+			dir: 'public/module/'
+		},
+		plugins: [
+			svelte({
+				// enable run-time checks when not in production
+				dev: !production,
+				// we'll extract any component CSS out into
+				// a separate file - better for performance
+				css: css => {
+					css.write('public/build/bundle.css');
+				},
+				hydratable: true
+			}),
+
+			// If you have external dependencies installed from
+			// npm, you'll most likely need these plugins. In
+			// some cases you'll need additional configuration -
+			// consult the documentation for details:
+			// https://github.com/rollup/plugins/tree/master/packages/commonjs
+			resolve({
+				browser: true,
+				dedupe: ['svelte']
+			}),
+			commonjs(),
+
+			// In dev mode, call `npm run start` once
+			// the bundle has been generated
+			!production && serve(),
+
+			// Watch the `public` directory and refresh the
+			// browser on changes when not in production
+			!production && livereload('public'),
+
+			// If we're building for production (npm run build
+			// instead of npm run dev), minify
+			production && terser()
+		],
+		watch: {
+			clearScreen: false
+		}
+	}
+
+];
+
+function serve() {
+	let started = false;
+
+	return {
+		writeBundle() {
+			if (!started) {
+				started = true;
+
+				require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {
+					stdio: ['ignore', 'inherit', 'inherit'],
+					shell: true
+				});
+			}
+		}
+	};
+}
+```
+
+### routes.js (which hold all your route in json object)
+
+```javascript
+import AdminLayout from './views/layouts/admin.svelte';
+import PublicLayout from './views/layouts/public.svelte';
+import Page404 from './views/pages/404.svelte';
+
+const routes = {
+	groupGuard: [
+		{
+			url: [/^members/],
+			with: async function (routerData, route) {
+				return true;
+			},
+			redirectOnFail: function (routerData, route) {
+				return '/dashboard';
+			}
+		}
+
+	],
+	routes: [
+		{
+			name: "dashboard",
+			url: [/^dashboard$/, /^\s*$/],
+			guard: {
+				with: async function (routerData, route) {
+					return true;
+				},
+				redirectOnFail: '/404'
+			},
+			layout: AdminLayout,
+			component: async function () {
+				let com = await import('./views/pages/dashboard.svelte');
+				return com.default;
+			}
+		},
+		{
+			name: "members",
+			url: [/^members/],
+			searchFilter: async function (routerData, route) {
+				return true;
+			},
+			guard: {
+				with: async function (routerData, route) {
+					return true;
+				},
+				redirectOnFail: '/404'
+			},
+			layout: AdminLayout,
+			component: async function () {
+				let com = await import('./views/pages/membersList.svelte');
+				return com.default;
+			}
+		},
+		{
+			name: "404",
+			url: [/^404$/],
+			layout: PublicLayout,
+			component: Page404
+		}
+	]
+};
+
+export { routes }
+```
+
+#### As you can see the difference in above example
+
+instead of import required component from the start and direct assign into component
+
+we are loading it dynamically using function, only when that route is called
+
+without code splitting its look like this
+
+```javascript
+import Dashboard from './views/pages/dashboard.svelte';
+
+{
+	component: Dashboard
+}
+
+```
+
+with code splitting its like this
+
+```javascript
+{
+	component: async function () {
+				let com = await import('./views/pages/dashboard.svelte');
+				return com.default;
+			}
+}
+```
 
 
+### public/index.html
+
+as you notice instead of loading the bundel.js 
+
+now we are loading main.js which is main entry point of application which load other chunk dynamically.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset='utf-8'>
+	<meta name='viewport' content='width=device-width,initial-scale=1'>
+	<title>Svelte app</title>
+	<link rel='icon' type='image/png' href='http://localhost:5000/favicon.png'>
+	<link rel='stylesheet' href='http://localhost:5000/global.css'>
+	<link rel='stylesheet' href='http://localhost:5000/build/bundle.css'>
+	<script type="module" src='http://localhost:5000/module/main.js'></script>
+</head>
+
+<body>
+</body>
+
+</html>
+```
 
 
+## Settings For Server Side Rendering (SSR) + Code Splitting
 
+**If you are using Code Splitting + SSR, then you also need to change the rollup.config.js for SSR part**
+
+**All other setting for SSR and Code Splitting remain as it is**
+
+### rollup.conig.js
+
+as you can see now instead of output single file now we also change to directory **public/ssr/** which hold the App.js file and chunk files
+
+```javascript
+//server ssr bundel
+{
+	input: "src/App.svelte",
+	output: {
+		sourcemap: false,
+		format: "cjs",
+		name: "app",
+		dir: "public/ssr/"
+	},
+	plugins: [
+		svelte({
+			generate: "ssr"
+		}),
+		resolve(),
+		commonjs(),
+		production && terser()
+	]
+}
+```
+
+### node.js server
+
+you can use any server of your choice 
+
+```javascript
+onst http = require('http');
+const App = require('./public/ssr/App.js');
+const port = 3000
+
+const requestHandler = (request, response) => {
+	let url = 'http://' + request.headers.host + request.url;
+	const { head, html, css } = App.render({ url: url });
+	let output = `<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Document</title>
+		<link rel='stylesheet' href='http://localhost:5000/global.css'>
+		<link rel='stylesheet' href='http://localhost:5000/build/bundle.css'>
+		<script type="module" src='http://localhost:5000/module/main.js'></script>
+	</head>
+	<body>${html}</body>
+	</html>`;
+	response.end(output);
+}
+
+const server = http.createServer(requestHandler)
+
+server.listen(port, (err) => {
+	if (err) {
+		return console.log('something bad happened', err)
+	}
+	console.log(`server is listening on ${port}`)
+})
+```
 
 
 

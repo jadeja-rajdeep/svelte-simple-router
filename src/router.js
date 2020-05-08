@@ -219,11 +219,16 @@ async function svelteRouteMatcher(router, url = "") {
 	if (activeRouteTemp.layout.layout === "" || activeRouteTemp.layout.layout === "undefined" || typeof activeRouteTemp.layout.layout === "undefined") {
 		activeRouteTemp.layout.layout = '';
 		activeRouteTemp.layout.viewed = true;
+	} else if (typeof activeRouteTemp.layout.layout === "function" && activeRouteTemp.layout.layout.constructor.name === "AsyncFunction") {
+		activeRouteTemp.layout.layout = await activeRouteTemp.layout.layout();
 	}
 
 	if (activeRouteTemp.component.component === "" || activeRouteTemp.component.component === "undefined" || typeof activeRouteTemp.component.component === "undefined") {
 		activeRouteTemp.component.component = '';
 		activeRouteTemp.component.viewed = true;
+	}
+	else if (typeof activeRouteTemp.component.component === "function" && activeRouteTemp.component.component.constructor.name === "AsyncFunction") {
+		activeRouteTemp.component.component = await activeRouteTemp.component.component();
 	}
 
 	activeRoute.set(activeRouteTemp);
