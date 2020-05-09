@@ -25,10 +25,10 @@ Ensure your local server is configured in SPA mode. In a default Svelte installa
 create routes.js file into your project directory
 
 ```javascript
-import AdminLayout from './views/layouts/admin.svelte';
-import PublicLayout from './views/layouts/public.svelte';
-import Dashboard from './views/pages/dashboard.svelte';
-import MembersList from './views/pages/membersList.svelte';
+import AdminLayout from './views/layouts/Admin.svelte';
+import PublicLayout from './views/layouts/Public.svelte';
+import Dashboard from './views/pages/Dashboard.svelte';
+import MembersList from './views/pages/MembersList.svelte';
 import Page404 from './views/pages/404.svelte';
 
 const routes = {
@@ -98,9 +98,9 @@ export { routes }
 
 ### Step 3 : Create Layout File
 
-for example : import AdminLayout from './views/layouts/admin.svelte';
+for example : import AdminLayout from './views/layouts/Admin.svelte';
 
-we created admin.svelte file
+we created Admin.svelte file
 
 ```javascript
 <script>
@@ -119,9 +119,9 @@ we created admin.svelte file
 
 ### Step 4 : Create Component/Page File
 
-for example : import Dashboard from './views/pages/dashboard.svelte';
+for example : import Dashboard from './views/pages/Dashboard.svelte';
 
-we created dashboard.svelte file
+we created Dashboard.svelte file
 
 ```javascript
 <script>
@@ -133,10 +133,10 @@ we created dashboard.svelte file
 ## Structure of routes object
 
 ```javascript
-import AdminLayout from './views/layouts/admin.svelte';
-import PublicLayout from './views/layouts/public.svelte';
-import Dashboard from './views/pages/dashboard.svelte';
-import MembersList from './views/pages/membersList.svelte';
+import AdminLayout from './views/layouts/Admin.svelte';
+import PublicLayout from './views/layouts/Public.svelte';
+import Dashboard from './views/pages/Dashboard.svelte';
+import MembersList from './views/pages/MembersList.svelte';
 import Page404 from './views/pages/404.svelte';
 
 const routes = {
@@ -397,6 +397,16 @@ RouterRedirect('/some-other-url');
 RouterRedirect('https://someother.url');
 ```
 
+**noFollow** you can also pass no **noFollow** true or false in second parameter to tell router whether you bypass the matching or not.
+
+By default **noFollow** is set to **false**
+
+usage example
+
+```javascript
+RouterRedirect('/some-other-url',true); //will not goes into route matching and directly do regular page redirect
+```
+
 ## Settings For Server Side Rendering (SSR)
 
 there is example in examples/ssr folder on github.
@@ -651,8 +661,8 @@ function serve() {
 ### routes.js (which hold all your route in json object)
 
 ```javascript
-import AdminLayout from './views/layouts/admin.svelte';
-import PublicLayout from './views/layouts/public.svelte';
+import AdminLayout from './views/layouts/Admin.svelte';
+import PublicLayout from './views/layouts/Public.svelte';
 import Page404 from './views/pages/404.svelte';
 
 const routes = {
@@ -680,7 +690,7 @@ const routes = {
 			},
 			layout: AdminLayout,
 			component: async function () {
-				let com = await import('./views/pages/dashboard.svelte');
+				let com = await import('./views/pages/Dashboard.svelte');
 				return com.default;
 			}
 		},
@@ -698,7 +708,7 @@ const routes = {
 			},
 			layout: AdminLayout,
 			component: async function () {
-				let com = await import('./views/pages/membersList.svelte');
+				let com = await import('./views/pages/MembersList.svelte');
 				return com.default;
 			}
 		},
@@ -723,7 +733,7 @@ we are loading it dynamically using function, only when that route is called
 without code splitting its look like this
 
 ```javascript
-import Dashboard from './views/pages/dashboard.svelte';
+import Dashboard from './views/pages/Dashboard.svelte';
 
 {
 	component: Dashboard
@@ -736,7 +746,7 @@ with code splitting its like this
 ```javascript
 {
 	component: async function () {
-				let com = await import('./views/pages/dashboard.svelte');
+				let com = await import('./views/pages/Dashboard.svelte');
 				return com.default;
 			}
 }

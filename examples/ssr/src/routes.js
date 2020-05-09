@@ -1,7 +1,7 @@
-import AdminLayout from './views/layouts/admin.svelte';
-import PublicLayout from './views/layouts/public.svelte';
-import Dashboard from './views/pages/dashboard.svelte';
-import MembersList from './views/pages/membersList.svelte';
+import AdminLayout from './views/layouts/Admin.svelte';
+import PublicLayout from './views/layouts/Public.svelte';
+import Dashboard from './views/pages/Dashboard.svelte';
+import MembersList from './views/pages/MembersList.svelte';
 import Page404 from './views/pages/404.svelte';
 
 const routes = {

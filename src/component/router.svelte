@@ -1,7 +1,7 @@
 <script>
 	import { activeRoute } from './../store.js';
 	import { svelteRouteMatcher } from './../router.js';
-	import Route from './route.svelte';
+	import Route from './Route.svelte';
 	export let routes;
 	export let url = "";
 	export let currentRoute = {};

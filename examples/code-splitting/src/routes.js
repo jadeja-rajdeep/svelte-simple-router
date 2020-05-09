@@ -1,5 +1,5 @@
-import AdminLayout from './views/layouts/admin.svelte';
-import PublicLayout from './views/layouts/public.svelte';
+import AdminLayout from './views/layouts/Admin.svelte';
+import PublicLayout from './views/layouts/Public.svelte';
 import Page404 from './views/pages/404.svelte';
 
 const routes = {
@@ -27,7 +27,7 @@ const routes = {
 			},
 			layout: AdminLayout,
 			component: async function () {
-				let com = await import('./views/pages/dashboard.svelte');
+				let com = await import('./views/pages/Dashboard.svelte');
 				return com.default;
 			}
 		},
@@ -45,7 +45,7 @@ const routes = {
 			},
 			layout: AdminLayout,
 			component: async function () {
-				let com = await import('./views/pages/membersList.svelte');
+				let com = await import('./views/pages/MembersList.svelte');
 				return com.default;
 			}
 		},

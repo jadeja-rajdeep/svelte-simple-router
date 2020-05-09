@@ -265,12 +265,16 @@ function sveletRouterCheckHost(redirectUlr) {
 	// return true;
 }
 
-function svelteRouterRedirect(redirectUlr) {
-	if (sveletRouterCheckHost(redirectUlr)) {
-		history.pushState("", "", redirectUlr);
-		svelteRouteMatcher(globalRouter);
-	} else {
+function svelteRouterRedirect(redirectUlr, noFollow = false) {
+	if (noFollow == true) {
 		window.location = redirectUlr;
+	} else {
+		if (sveletRouterCheckHost(redirectUlr)) {
+			history.pushState("", "", redirectUlr);
+			svelteRouteMatcher(globalRouter);
+		} else {
+			window.location = redirectUlr;
+		}
 	}
 }
 
